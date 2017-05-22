@@ -1,7 +1,7 @@
 {
   "name": "auth-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Basic authenticated API using Docker, Node, Restify, Passport, and Mongo",
   "main": "app/index.js",
   "scripts": {
     "start": "node app/index.js",
