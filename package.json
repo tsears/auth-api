@@ -1,16 +1,26 @@
 {
-  "name": "thunderhunt-api",
+  "name": "auth-api",
   "version": "1.0.0",
   "description": "",
   "main": "app/index.js",
   "scripts": {
     "start": "node app/index.js",
+    "test": "karma start --single-run",
     "dev": "node_modules/nodemon/bin/nodemon.js app/index.js",
     "container:dev": "docker-compose -f docker-compose/dev.yml up"
   },
   "author": "Tom Sears",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "jasmine-core": "^2.6.2",
+    "jasmine-node": "^1.14.5",
+    "jasmine-spec-reporter": "^4.1.0",
+    "karma": "^1.7.0",
+    "karma-coverage": "^1.1.1",
+    "karma-requirejs": "^1.1.0",
+    "karma-spec-reporter": "0.0.31",
+    "requirejs": "^2.3.3"
+  },
   "dependencies": {
     "client-sessions": "^0.8.0",
     "connect-flash": "^0.1.1",
