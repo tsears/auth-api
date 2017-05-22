@@ -1,0 +1,24 @@
+{
+  "name": "thunderhunt-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app/index.js",
+  "scripts": {
+    "start": "node app/index.js",
+    "dev": "node_modules/nodemon/bin/nodemon.js app/index.js",
+    "container:dev": "docker-compose -f docker-compose/dev.yml up"
+  },
+  "author": "Tom Sears",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "client-sessions": "^0.8.0",
+    "connect-flash": "^0.1.1",
+    "mongoose": "^4.10.0",
+    "nodemon": "^1.11.0",
+    "passport-local": "^1.0.0",
+    "passport-restify": "^1.0.1",
+    "restify": "^4.3.0",
+    "restify-router": "^0.4.2"
+  }
+}

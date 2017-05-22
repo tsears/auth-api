@@ -1,0 +1,22 @@
+version: '2'
+services:
+  db:
+    image: mongo
+    ports:
+      - '27017:27017'
+  thunderhunt:
+    image: tsears/thunderhunt-api
+    environment:
+      MODE: 'dev'
+    links:
+      - 'db'
+    ports:
+      - '8000:8000'
+    env_file:
+      - ../.env.list
+    volumes:
+      - ../:/var/app:ro
+    entrypoint:
+      - /bin/bash
+      - -c
+      - "cd /var/app && ls && npm run dev"
