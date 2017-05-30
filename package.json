@@ -8,7 +8,7 @@
     "test": "istanbul cover --include-all-sources jasmine-node test",
     "dev": "node_modules/nodemon/bin/nodemon.js app/index.js",
     "container:dev": "docker-compose -f docker-compose/dev.yml up",
-    "cover": "istanbul cover jasmine-node --include-all-sources --captureExceptions spec/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "cover": "istanbul cover jasmine-node --include-all-sources --captureExceptions test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "author": "Tom Sears",
   "license": "MIT",
