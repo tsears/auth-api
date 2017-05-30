@@ -9,50 +9,88 @@ const passport        = require('passport-restify');
 const passportInit    = require('./init/passport');
 const adminInit       = require('./init/admin');
 const LocalStrategy   = require('passport-local').Strategy;
-const sessions        = require("client-sessions");
+const sessions        = require('client-sessions');
+const routes           = require('./routes');
 
-log('log', 'info', 'initialized logging');
+const isModule = require.main !== module
 
-mongoose.Promise = global.Promise;
+const app = {
+    init: (log, adminInit, passportInit, settings, passport, User ) => {
+        log('log', 'info', 'initialized logging');
 
-adminInit(User, {
-  user: settings.adminUser,
-  pass: settings.adminPass,
-}, log);
-passportInit(passport, User);
+        adminInit(User, {
+          user: settings.adminUser,
+          pass: settings.adminPass,
+        }, log);
+        passportInit(passport, User);
 
-const server = restify.createServer({
-  name: 'Thunderhunt-API',
-});
+    },
+    configureServer: (restify, sessions, settings, flash, passport) => {
+        const server = restify.createServer({
+          name: settings.appName,
+        });
 
+        server.use(restify.queryParser());
+        server.use(restify.bodyParser());
+        server.use(flash());
 
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
-server.use(flash());
+        server.use(sessions({
+            // cookie name dictates the key name added to the request object
+            cookieName: 'session',
+            // should be a large unguessable string
+            secret: settings.sessionSecret,
+            // how long the session will stay valid in ms
+            duration: 90 * 24 * 60 * 60 * 1000, // 90 days
+        }));
 
-server.use(sessions({
-    // cookie name dictates the key name added to the request object
-    cookieName: 'session',
-    // should be a large unguessable string
-    secret: settings.sessionSecret,
-    // how long the session will stay valid in ms
-    duration: 90 * 24 * 60 * 60 * 1000, // 90 days
-}));
+        // Initialize passport
+        server.use(passport.initialize());
+        // Set up the passport session
+        server.use(passport.session());
 
-// Initialize passport
-server.use(passport.initialize());
-// Set up the passport session
-server.use(passport.session());
+        return server;
+    },
+    configureRoutes: (Router, routes, server, passport, log) => {
+        const router = new Router();
+        router.add('/', routes(passport, log));
 
-const router = new Router();
-router.add('/', require('./routes')(passport, log));
+        router.applyRoutes(server, '/');
+    },
+    configureDB: (mongoose, settings, promise, log) => {
+        const mongooseConnectionString = "mongodb://" + settings.mongoIP + ":" + settings.mongoPort + "/" + settings.mongoDatabase;
+        mongoose.Promise = promise;
+        mongoose.connect(mongooseConnectionString);
+        log('db', 'info', "Connected to db @ " + mongooseConnectionString);
+    },
+    startServer: (server, settings, log) => {
+        server.listen(settings.port, function() {
+          log('server', 'info', `${server.name} listening at ${server.url}`);
+        });
+    },
+    run: (log, adminInit, passportInit, settings, passport, User, restify, sessions, flash, mongoose) => {
 
-router.applyRoutes(server, '/');
+        app.init(log, adminInit, passportInit, settings, passport, User);
+        const server = app.configureServer(restify, sessions, settings, flash, passport);
+        app.configureRoutes(Router, routes, server, passport, log)
+        app.configureDB(mongoose, settings, global.Promise, log);
+        app.startServer(server, settings, log);
+    },
+}
 
-var mongooseConnectionString = "mongodb://" + settings.mongoIP + ":" + settings.mongoPort + "/" + settings.mongoDatabase;
-mongoose.connect(mongooseConnectionString);
-log('db', 'info', "Connected to db @ " + mongooseConnectionString);
-
-server.listen(settings.port, function() {
-  log('server', 'info', `${server.name} listening at ${server.url}`);
-});
+if (!isModule) {
+    // for injectability during testing...
+    app.run(
+        log,
+        adminInit,
+        passportInit,
+        settings,
+        passport,
+        User,
+        restify,
+        sessions,
+        flash,
+        mongoose
+    );
+} else {
+    module.exports =  app;
+}

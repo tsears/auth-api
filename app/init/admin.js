@@ -1,5 +1,3 @@
-
-
 module.exports = function(User, options, log) {
 
   User.findOne({ username: options.user})

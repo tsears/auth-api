@@ -9,6 +9,7 @@ module.exports = function(env) {
       sessionSecret: env.SESSION_SECRET,
       adminUser: env.ADMIN_USER,
       adminPass: env.ADMIN_PASS,
+      appName: env.APP_NAME,
     }
   }
 
