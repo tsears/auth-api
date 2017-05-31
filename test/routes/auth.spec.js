@@ -68,6 +68,12 @@ describe('routes/auth', () => {
         expect(reqSpy.logIn).toHaveBeenCalledWith({username: 'foo'}, jasmine.any(Function));
     });
 
+    it('calls next() with the error if an error happens calling req.logIn', () => {
+        const nextSpy = createSpy('next');
+        authRoutes.loginSuccess(null, null, null, nextSpy, 'foo');
+        expect(nextSpy).toHaveBeenCalledWith('foo');
+    });
+
     it('logs a message if login succeeds', () => {
         const resSpy = createSpyObj('res', ['json']);
         authRoutes.loginSuccess({username: 'foo'}, resSpy, logSpy, noop, null);
