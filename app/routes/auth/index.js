@@ -1,32 +1,42 @@
-const Router = require('restify-router').Router;
+function loginSuccess(user, res, log, next, err) {
+    if (err) { return next(err); }
+    log('auth', 'info', `User ${user.username} authenticated`);
+    return res.json(200, { authenticated: true });
+}
 
-module.exports = function(passport, log) {
-  const router = new Router();
-  log('router', 'info', 'initialized authentication routes');
+function passportLogin(req, res, next, log, err, user, info) {
+    if (err || !user) {
+        if (err) {
+            log('auth', 'warn', 'error during authentication', err);
+        } else {
+            log('auth', 'info', `Authentication failed for user ${req.params.username}`);
+        }
 
-  router.post('/login', login);
+        res.json(401, { authenticated: false });
+        return next(err);
+    }
 
-  function login(req, res, next) {
+    req.logIn(user, loginSuccess.bind(null, user, res, log, next));
+}
 
-    passport.authenticate('local-login', (err, user, info) => {
-     if (err || !user) {
-       if (err) {
-         log('auth', 'warn', 'error during authentication:\n' + err);
-       } else {
-         log('auth', 'info', `Authentication failed for user ${req.params.username}`);
-       }
+function handleLogin(passport, log, req, res, next) {
+    passport.authenticate('local-login',
+        passportLogin.bind(null, req, res, next, log)
+    )(req, res, next);
+}
 
-       res.json(401, { authenticated: false });
-       return next(err);
-     }
+function configure(Router, passport, log) {
+    const router = new Router();
+    log('router', 'info', 'initialized authentication routes');
 
-     req.logIn(user, function(err) {
-       if (err) { return next(err); }
-       log('auth', 'info', `User ${user.username} authenticated`);
-       return res.json(200, { authenticated: true });
-     });
-   })(req, res, next);
-  }
+    router.post('/login', handleLogin.bind(null, passport, log));
 
-  return router;
+    return router;
+}
+
+module.exports = {
+    configure,
+    handleLogin,
+    passportLogin,
+    loginSuccess,
 }
