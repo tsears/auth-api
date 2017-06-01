@@ -26,6 +26,7 @@ module.exports = function(passport, User) {
    }));
 
    function authenticate(req, username, password, done, user) {
+       console.log('hello');
      if (!user) {
          return done(null, false, req.flash('loginMessage', 'Login Failed.'));
      }
