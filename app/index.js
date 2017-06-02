@@ -22,7 +22,7 @@ const app = {
           user: settings.adminUser,
           pass: settings.adminPass,
         }, log);
-        passportInit(passport, User);
+        passportInit.configure(passport, User);
 
     },
     configureServer: (restify, sessions, settings, flash, passport) => {

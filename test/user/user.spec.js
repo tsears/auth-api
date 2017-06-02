@@ -1,17 +1,35 @@
 const mockery = require('mockery');
 const userModule = '../../app/user/user';
 
+let User;
+
 const mongooseMock = {
-    Schema: (schema) => { return { schema, methods: null }; },
-    model: (name, schema) => { return { name, schema }; },
+    Schema: function(schema) { return { schema, methods: {} }; },
+    model: function(name, schema) { return { name, schema }; },
 }
 
-mockery.registerAllowable(userModule);
-mockery.enable();
-mockery.registerMock('mongoose', mongooseMock);
-const User = require(userModule);
-
 describe('User model', () => {
+    beforeEach(() => {
+        mockery.enable({
+            warnOnReplace: false,
+            useCleanCache: true,
+        });
+
+        mockery.registerAllowable(userModule);
+        mockery.registerAllowable('bcrypt-nodejs');
+        mockery.registerAllowable('crypto');
+        mockery.registerMock('mongoose', mongooseMock);
+
+        // eslint-disable-next-line global-require
+        User = require(userModule);
+    });
+
+    afterEach(() => {
+        User = null;
+        mockery.disable();
+        mockery.deregisterAll();
+    });
+
     it('registers a method called generateHash', () => {
         expect(User.schema.methods.generateHash).not.toBeUndefined();
     })
@@ -36,5 +54,3 @@ describe('User model', () => {
         expect(validPW).toBe(false);
     });
 });
-
-mockery.disable();

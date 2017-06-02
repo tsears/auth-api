@@ -2,6 +2,8 @@ const Mongoose 	= require('mongoose');
 const bcrypt 	= require('bcrypt-nodejs');
 const Schema 	= Mongoose.Schema;
 
+Mongoose.Promise = global.Promise;
+
 const userSchema = new Schema({
 	username: String,
 	password: String,
