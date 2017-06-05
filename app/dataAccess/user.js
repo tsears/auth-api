@@ -1,14 +1,26 @@
-const User = require('./models/User');
+module.exports = function(User) {
 
-function findUserById(id) {
-    return User.findById(id).exec();
-}
+    const findById = (id) => {
+        return User.findById(id).exec();
+    }
 
-function findUserByName(username) {
-    return User.findOne({ 'username' :  username }).exec();
-}
+    const findByName = (username) => {
+        return User.findOne({ 'username' :  username }).exec();
+    }
 
-module.exports = {
-    findUserById,
-    findUserByName,
+    const create = (user, pass) => {
+        const newUser = new User();
+        newUser.username = user;
+        newUser.password = newUser.generateHash(pass);
+
+        //console.log(newUser);
+
+        return newUser.save().exec();
+    }
+
+    return {
+        findById,
+        findByName,
+        create,
+    }
 }
