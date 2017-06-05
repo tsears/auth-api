@@ -1,7 +1,6 @@
-const User = require('../user/user');
+const User = require('./models/User');
 
 function findUserById(id) {
-    console.log('fak');
     return User.findById(id).exec();
 }
 

@@ -6,20 +6,24 @@ function LocalStrategyMock(config, handler) {
     this.config = config;
     this.handler = handler;
 }
+
+const fakePromise = (arg) => {
+    // fake a promise chain without the async baggage...
+    return {
+        then: function(fn) {
+            fn(null, arg);
+
+            return {
+                catch: (fn) => { fn({message: 'foo'}) },
+            }
+        },
+
+    }
+}
+
 const userDataAccessMock =  {
-    findUserById: (id) => {
-        // fake a promise chain without the async baggage...
-        return {
-            then: function(fn) {
-                fn(null, id);
-
-                return {
-                    catch: (fn) => { fn({message: 'foo'}) },
-                }
-            },
-
-        }
-    },
+    findUserById: fakePromise,
+    findUserByName: fakePromise,
 }
 
 const UserFake = {
@@ -111,6 +115,49 @@ describe('Passport init', () => {
             expect(console.error).toHaveBeenCalledWith('error', 'foo');
 
             console.error = oldError;
+        });
+    });
+
+    describe('_authenticate', () => {
+        it('flashes failure if user is not found', () => {
+            const dummy = (...args) => { return args; };
+            const req = { flash: dummy };
+
+            result = passportInit._authenticate(req, 'foo', 'bar', dummy, null);
+
+            expect(result).toEqual([null, false, [ 'loginMessage', 'Login Failed.']]);
+        });
+
+        it('flashes failure on incorrect password', () => {
+            const userSpy = createSpyObj('user', ['validPassword']);
+            userSpy.validPassword.andReturn(false);
+            const dummy = (...args) => { return args; };
+            const req = { flash: dummy };
+
+            result = passportInit._authenticate(req, 'foo', 'bar', dummy, userSpy);
+
+            expect(result).toEqual([null, false, [ 'loginMessage', 'Login Failed.']]);
+        });
+
+        it('calls done with the user', () => {
+            const userSpy = createSpyObj('user', ['validPassword']);
+            userSpy.validPassword.andReturn(true);
+            const dummy = (...args) => { return args; };
+
+            result = passportInit._authenticate(null, 'foo', 'bar', dummy, userSpy);
+
+            expect(result).toEqual([ null, userSpy ]);
+        });
+    });
+
+    describe('_localStrategy', () => {
+        it('calls authenticate and the error handler', () => {
+            // fake promise allows for both happen simultaneously
+            const reqSpy = createSpyObj('req', ['flash']);
+            const doneSpy = createSpy('done');
+            passportInit._localStrategy(reqSpy, 'foo', 'bar', doneSpy)
+            expect(doneSpy).toHaveBeenCalledWith(null, false, undefined);
+            expect(doneSpy).toHaveBeenCalledWith( { message: 'foo' });
         });
     });
 });

@@ -1,5 +1,5 @@
 const mockery = require('mockery');
-const userModule = '../../app/user/user';
+const userModule = '../../app/dataAccess/models/User';
 
 let User;
 

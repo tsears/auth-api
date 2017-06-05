@@ -3,7 +3,7 @@ const restify         = require('restify');
 const mongoose        = require('mongoose');
 const settings        = require('./settings')(process.env);
 const log             = require('./log').Log;
-const User            = require('./user/user');
+const User            = require('./dataAccess/models/User');
 const flash           = require('connect-flash');
 const passport        = require('passport-restify');
 const passportInit    = require('./init/passport');
@@ -77,6 +77,7 @@ const app = {
     },
 }
 
+/* istanbul ignore if  */
 if (!isModule) {
     // for injectability during testing...
     app.run(

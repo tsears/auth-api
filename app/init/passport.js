@@ -20,17 +20,19 @@ function _authenticate(req, username, password, done, user) {
       return done(null, false, req.flash('loginMessage', 'Login Failed.'));
     }
 
-    if (!user.validPassword(password))
+    if (!user.validPassword(password)) {
       return done(null, false, req.flash('loginMessage', 'Login Failed.'));
+    }
 
     return done(null, user);
 }
 
 function _localStrategy(req, username, password, done) {
-    userDataAccess.findUserByName.then(authenticate.bind(null, req, username, password, done))
-     .catch((err) => {
-       return done(err);
-     });
+    userDataAccess.findUserByName(username)
+        .then(_authenticate.bind(null, req, username, password, done))
+        .catch((err) => {
+            return done(err);
+        });
 }
 
 function configure(passport, LocalStrategy) {
@@ -54,5 +56,6 @@ module.exports = {
     _deserializeUser,
     _userFound,
     _authenticate,
+    _localStrategy,
     configure,
 }
