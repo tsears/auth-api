@@ -38,8 +38,9 @@ describe('index.js', () => {
         it('logs a message', () => {
             const logSpy = createSpy('log');
             const passportInitSpy = createSpyObj('passportInit', ['configure']);
+            const UserAccessSpy = createSpy('UserAccess');
 
-            app.init(logSpy, noop, passportInitSpy, {}, {});
+            app.init(logSpy, noop, passportInitSpy, {}, {}, UserAccessSpy, {}, {});
 
             expect(logSpy).toHaveBeenCalled();
         });
@@ -51,20 +52,22 @@ describe('index.js', () => {
                 adminUser: 'foo',
                 adminPass: 'bar',
             };
+            const UserAccessSpy = createSpy('UserAccess');
 
             const adminUserPass = {
                 user: fakeSettings.adminUser,
                 pass: fakeSettings.adminPass,
             }
 
-            app.init(noop, adminInitSpy, passportInitSpy, fakeSettings, {}, 'User');
-            expect(adminInitSpy).toHaveBeenCalledWith('User', adminUserPass, jasmine.any(Function));
+            app.init(noop, adminInitSpy, passportInitSpy, fakeSettings, {}, UserAccessSpy, {}, {});
+            expect(adminInitSpy).toHaveBeenCalledWith({}, adminUserPass, jasmine.any(Function));
         });
 
         it('calls passportInit with passport and user', () => {
             const passportInitSpy = createSpyObj('passportInit', ['configure']);
+            const UserAccessSpy = createSpy('UserAccess');
 
-            app.init(noop, noop, passportInitSpy, {}, {}, {});
+            app.init(noop, noop, passportInitSpy, {}, {}, UserAccessSpy, {}, {});
 
             expect(passportInitSpy.configure).toHaveBeenCalled();
         });
@@ -160,7 +163,7 @@ describe('index.js', () => {
             const routesSpy = createSpy('routes');
             routesSpy.andReturn('foo');
 
-            app.configureRoutes(RouterSpy, routesSpy, 'server', 'passport', 'log');
+            app.configureRoutes(RouterSpy, routesSpy, {}, 'server', 'passport', 'log');
         });
 
         it('adds base routes', () => {

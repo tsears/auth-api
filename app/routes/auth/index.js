@@ -25,9 +25,9 @@ function handleLogin(passport, log, req, res, next) {
     )(req, res, next);
 }
 
-function configure(router, passport, log) {
+function configure(Router, passport, log) {
     log('router', 'info', 'initialized authentication routes');
-
+    const router = new Router();
     router.post('/login', handleLogin.bind(null, passport, log));
 
     return router;

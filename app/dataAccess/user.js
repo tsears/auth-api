@@ -1,19 +1,16 @@
-module.exports = function(User) {
-
+module.exports = function(UserModel) {
     const findById = (id) => {
-        return User.findById(id).exec();
+        return UserModel.findById(id).exec();
     }
 
     const findByName = (username) => {
-        return User.findOne({ 'username' :  username }).exec();
+        return UserModel.findOne({ 'username' :  username }).exec();
     }
 
     const create = (user, pass) => {
-        const newUser = new User();
+        const newUser = new UserModel();
         newUser.username = user;
         newUser.password = newUser.generateHash(pass);
-
-        //console.log(newUser);
 
         return newUser.save().exec();
     }

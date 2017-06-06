@@ -4,8 +4,8 @@ services:
     image: mongo
     ports:
       - '27017:27017'
-  thunderhunt:
-    image: tsears/thunderhunt-api
+  auth-api:
+    image: tsears/auth-api
     environment:
       MODE: 'dev'
     links:

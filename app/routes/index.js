@@ -1,6 +1,6 @@
-module.exports = function(router, authRoutes, passport, log) {
-
-  router.add('/auth', authRoutes.configure(router, passport, log));
+module.exports = function(Router, authRoutes, passport, log) {
+  const router = new Router();
+  router.add('/auth', authRoutes.configure(Router, passport, log));
 
   return router;
 }
