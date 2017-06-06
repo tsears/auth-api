@@ -13,7 +13,6 @@ function _ensureAdmin(User, log, username, password, adminUser) {
   }
 }
 
-
 module.exports = function(User, options, log) {
 
     User.findByName(options.user)

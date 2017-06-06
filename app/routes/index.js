@@ -1,10 +1,6 @@
-const auth = require('./auth');
-const Router = require('restify-router').Router;
+module.exports = function(router, authRoutes, passport, log) {
 
-module.exports = function(passport, log) {
-  const router = new Router();
-
-  router.add('/auth', auth.configure(Router, passport, log));
+  router.add('/auth', authRoutes.configure(router, passport, log));
 
   return router;
 }

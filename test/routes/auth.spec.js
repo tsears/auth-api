@@ -8,12 +8,9 @@ describe('routes/auth', () => {
         logSpy;
 
     beforeEach(() => {
-        const RouterSpy = createSpy('Router');
         routerSpy = createSpyObj('router', [
             'post',
         ]);
-
-        RouterSpy.andReturn(routerSpy);
 
         passportSpy = createSpyObj('passport', [
             'authenticate',
@@ -23,7 +20,7 @@ describe('routes/auth', () => {
 
         logSpy = createSpy('log');
 
-        authRoutes.configure(RouterSpy, passportSpy, logSpy);
+        authRoutes.configure(routerSpy, passportSpy, logSpy);
     });
 
     it('registers a handler for /login', () => {

@@ -52,7 +52,7 @@ const app = {
     },
     configureRoutes: (Router, routes, server, passport, log) => {
         const router = new Router();
-        router.add('/', routes(passport, log));
+        router.add('/', routes(router, passport, log));
 
         router.applyRoutes(server, '/');
     },
