@@ -1,22 +1,23 @@
-const Router          = require('restify-router').Router;
-const restify         = require('restify');
-const mongoose        = require('mongoose');
-const settings        = require('./settings')(process.env);
-const log             = require('./log').Log;
-const UserAccess      = require('./dataAccess/user');
-const UserModel       = require('./dataAccess/models/User');
-const flash           = require('connect-flash');
-const passport        = require('passport-restify');
-const passportInit    = require('./init/passport');
-const adminInit       = require('./init/admin');
-const LocalStrategy   = require('passport-local').Strategy;
-const sessions        = require('client-sessions');
-const routes          = require('./routes');
-const authRoutes      = require('./routes/auth');
+import express         from 'express';
+import mongoose        from 'mongoose';
+import Settings        from './settings';
+import { Log as log }  from './log';
+import UserAccess      from './dataAccess/user';
+import UserModel       from './dataAccess/models/User';
+import flash           from 'connect-flash';
+import passport        from 'passport';
+import queryParser     from 'query-parser';
+import bodyParser      from 'body-parser';
+import passportInit    from './init/passport';
+import adminInit       from './init/admin';
+import { Strategy as LocalStrategy } from 'passport-local';
+import session        from 'express-session';
+import routes          from './routes';
+import authRoutes      from './routes/auth';
 
-const isModule = require.main !== module
+const settings = Settings(process.env);
 
-const app = {
+export const app = {
     init: (log, adminInit, passportInit, settings, passport, UserAccess, UserModel, LocalStrategy) => {
         log('log', 'info', 'initialized logging');
         const User = new UserAccess(UserModel);
@@ -29,15 +30,13 @@ const app = {
 
     },
     configureServer: (restify, sessions, settings, flash, passport) => {
-        const server = restify.createServer({
-          name: settings.appName,
-        });
+        const server = express();
 
-        server.use(restify.queryParser());
-        server.use(restify.bodyParser());
+        //server.use(queryParser());
+        server.use(bodyParser());
         server.use(flash());
 
-        server.use(sessions({
+        server.use(session({
             // cookie name dictates the key name added to the request object
             cookieName: 'session',
             // should be a large unguessable string
@@ -54,10 +53,11 @@ const app = {
         return server;
     },
     configureRoutes: (Router, routes, authRoutes, server, passport, log) => {
-        const router = new Router();
-        router.add('/', routes(Router, authRoutes, passport, log));
+        const router = Router();
+        router.use(routes(Router, authRoutes, passport, log));
 
-        router.applyRoutes(server, '/');
+        server.use('/', router);
+        //router.applyRoutes(server, '/');
     },
     configureDB: (mongoose, settings, promise, log) => {
         const mongooseConnectionString = "mongodb://" + settings.mongoIP + ":" + settings.mongoPort + "/" + settings.mongoDatabase;
@@ -67,37 +67,31 @@ const app = {
     },
     startServer: (server, settings, log) => {
         server.listen(settings.port, function() {
-          log('server', 'info', `${server.name} listening at ${server.url}`);
+          log('server', 'info', `${settings.appName} listening at http://localhost:${settings.port}`);
         });
     },
-    run: (log, adminInit, passportInit, settings, passport, LocalStrategy, UserAccess, UserModel, restify, sessions, flash, mongoose, routes, authRoutes) => {
+    run: (log, adminInit, passportInit, settings, passport, LocalStrategy, UserAccess, UserModel, express, sessions, flash, mongoose, routes, authRoutes) => {
         app.init(log, adminInit, passportInit, settings, passport, UserAccess, UserModel, LocalStrategy);
-        const server = app.configureServer(restify, sessions, settings, flash, passport);
-        app.configureRoutes(Router, routes, authRoutes, server, passport, log)
+        const server = app.configureServer(express, sessions, settings, flash, passport);
+        app.configureRoutes(express.Router, routes, authRoutes, server, passport, log)
         app.configureDB(mongoose, settings, global.Promise, log);
         app.startServer(server, settings, log);
     },
 }
 
-/* istanbul ignore if  */
-if (!isModule) {
-    // for injectability during testing...
-    app.run(
-        log,
-        adminInit,
-        passportInit,
-        settings,
-        passport,
-        LocalStrategy,
-        UserAccess,
-        UserModel,
-        restify,
-        sessions,
-        flash,
-        mongoose,
-        routes,
-        authRoutes
-    );
-} else {
-    module.exports =  app;
-}
+app.run(
+    log,
+    adminInit,
+    passportInit,
+    settings,
+    passport,
+    LocalStrategy,
+    UserAccess,
+    UserModel,
+    express,
+    session,
+    flash,
+    mongoose,
+    routes,
+    authRoutes
+);

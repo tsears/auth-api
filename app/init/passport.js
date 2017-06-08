@@ -25,11 +25,11 @@ function _authenticate(req, username, password, done, user) {
 }
 
 function _localStrategy(UserAccess) {
-
     return function(req, username, password, done) {
         UserAccess.findByName(username)
             .then(_authenticate.bind(null, req, username, password, done))
             .catch((err) => {
+                console.log('err');
                 return done(err);
             });
     }

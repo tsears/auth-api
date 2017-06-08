@@ -15,7 +15,7 @@ RUN mkdir -p ${appDir}
 WORKDIR ${appDir}
 
 add package.json ./
-ADD ./app ${appDir}
+ADD ./dist ${appDir}
 RUN npm i --production
 RUN ls -lah
 cmd ["npm", "start"]

@@ -2,35 +2,42 @@
   "name": "auth-api",
   "version": "1.0.0",
   "description": "Basic authenticated API using Docker, Node, Restify, Passport, and Mongo",
-  "main": "app/index.js",
+  "main": "dist/bundle.js",
   "scripts": {
-    "start": "node app/index.js",
+    "build": "node_modules/.bin/webpack",
+    "build:watch": "node_modules/.bin/webpack --watch",
+    "start": "node dist/bundle.js",
     "test": "istanbul cover --include-all-sources jasmine-node test",
     "test:min": "jasmine-node test/ || true",
     "test:cont": "jasmine-node test/ --autotest --watch test/ app/ || true",
-    "dev": "node_modules/nodemon/bin/nodemon.js app/index.js",
+    "dev": "node_modules/nodemon/bin/nodemon.js --watch dist",
     "container:dev": "docker-compose -f docker-compose/dev.yml up",
     "cover": "istanbul cover jasmine-node --include-all-sources --captureExceptions test/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "author": "Tom Sears",
   "license": "MIT",
   "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
     "coveralls": "^2.13.1",
     "istanbul": "^0.4.5",
     "jasmine-core": "^2.6.2",
     "jasmine-node": "^1.14.5",
     "jasmine-spec-reporter": "^4.1.0",
-    "mockery": "^2.0.0"
+    "json-loader": "^0.5.4",
+    "mockery": "^2.0.0",
+    "webpack": "^2.6.1"
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
-    "client-sessions": "^0.8.0",
+    "body-parser": "^1.17.2",
     "connect-flash": "^0.1.1",
+    "express": "^4.15.3",
+    "express-session": "^1.15.3",
     "mongoose": "^4.10.0",
     "nodemon": "^1.11.0",
+    "passport": "^0.3.2",
     "passport-local": "^1.0.0",
-    "passport-restify": "^1.0.1",
-    "restify": "^4.3.0",
-    "restify-router": "^0.4.2"
+    "query-parser": "0.0.1"
   }
 }
