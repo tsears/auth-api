@@ -21,9 +21,9 @@ const fakePromise = (arg) => {
     }
 }
 
-const userDataAccessMock =  {
-    findUserById: fakePromise,
-    findUserByName: fakePromise,
+const UserDataAccessMock =  {
+    findById: fakePromise,
+    findByName: fakePromise,
 }
 
 const UserFake = {
@@ -39,7 +39,6 @@ describe('Passport init', () => {
         });
         mockery.registerAllowable(passportInitModule);
         mockery.registerMock('passport-local', LocalStrategyMock);
-        mockery.registerMock('../../app/dataAccess/user', userDataAccessMock);
 
         // eslint-disable-next-line global-require
         passportInit = require(passportInitModule);
@@ -59,17 +58,17 @@ describe('Passport init', () => {
 
     describe('configure', () => {
         it('registers a serialze user callback', () => {
-            passportInit.configure(passport, LocalStrategyMock);
+            passportInit.configure(passport, UserDataAccessMock, LocalStrategyMock);
             expect(passport.serializeUser).toHaveBeenCalledWith(jasmine.any(Function));
         });
 
         it('registers a deserialize user callback', () => {
-            passportInit.configure(passport, LocalStrategyMock);
+            passportInit.configure(passport, UserDataAccessMock, LocalStrategyMock);
             expect(passport.deserializeUser).toHaveBeenCalledWith(jasmine.any(Function));
         })
 
         it('registers local login middleware', () => {
-            passportInit.configure(passport, LocalStrategyMock);
+            passportInit.configure(passport, UserDataAccessMock, LocalStrategyMock);
             expect(passport.use).toHaveBeenCalledWith(
                 'local-login',
                 jasmine.any(Object)
@@ -77,7 +76,7 @@ describe('Passport init', () => {
         });
 
         it('configures the correct username and passport fields', () => {
-            const strategy = passportInit.configure(passport, LocalStrategyMock);
+            const strategy = passportInit.configure(passport, UserDataAccessMock, LocalStrategyMock);
             expect(strategy.config.usernameField).toBe('username');
             expect(strategy.config.passwordField).toBe('password');
         });
@@ -109,7 +108,7 @@ describe('Passport init', () => {
             console.error = createSpy();
             const userFoundSpy = createSpy('userFound');
 
-            passportInit._deserializeUser(userFoundSpy, 123, 'done');
+            passportInit._deserializeUser(UserDataAccessMock, userFoundSpy, 123, 'done');
 
             expect(userFoundSpy).toHaveBeenCalledWith('done', null, 123);
             expect(console.error).toHaveBeenCalledWith('error', 'foo');
@@ -155,7 +154,7 @@ describe('Passport init', () => {
             // fake promise allows for both happen simultaneously
             const reqSpy = createSpyObj('req', ['flash']);
             const doneSpy = createSpy('done');
-            passportInit._localStrategy(reqSpy, 'foo', 'bar', doneSpy)
+            passportInit._localStrategy(UserDataAccessMock)(reqSpy, 'foo', 'bar', doneSpy)
             expect(doneSpy).toHaveBeenCalledWith(null, false, undefined);
             expect(doneSpy).toHaveBeenCalledWith( { message: 'foo' });
         });

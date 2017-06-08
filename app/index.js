@@ -25,7 +25,7 @@ const app = {
           user: settings.adminUser,
           pass: settings.adminPass,
         }, log);
-        passportInit.configure(passport, LocalStrategy);
+        passportInit.configure(passport, User, LocalStrategy);
 
     },
     configureServer: (restify, sessions, settings, flash, passport) => {
