@@ -1,6 +1,6 @@
-const log = require('../../app/log').Log;
+import log from '../../app/log';
 
-describe('log', () => {
+fdescribe('log', () => {
     it('logs when data is present', () => {
         const oldLog = console.log;
         let result;

@@ -1,7 +1,7 @@
 import express         from 'express';
 import mongoose        from 'mongoose';
 import Settings        from './settings';
-import { Log as log }  from './log';
+import log             from './log';
 import UserAccess      from './dataAccess/user';
 import UserModel       from './dataAccess/models/User';
 import flash           from 'connect-flash';

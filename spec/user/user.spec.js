@@ -1,33 +1,19 @@
-const mockery = require('mockery');
-const userModule = '../../app/dataAccess/models/User';
+import userModule from '../../app/dataAccess/models/User';
 
-let User;
+fdescribe('User model', () => {
+    let User;
 
-const mongooseMock = {
-    Schema: function(schema) { return { schema, methods: {} }; },
-    model: function(name, schema) { return { name, schema }; },
-}
-
-describe('User model', () => {
     beforeEach(() => {
-        mockery.enable({
-            warnOnReplace: false,
-            useCleanCache: true,
-        });
-
-        mockery.registerAllowable(userModule);
-        mockery.registerAllowable('bcrypt-nodejs');
-        mockery.registerAllowable('crypto');
-        mockery.registerMock('mongoose', mongooseMock);
-
-        // eslint-disable-next-line global-require
-        User = require(userModule);
+        const mongooseMock = {
+            Schema: function(schema) { return { schema, methods: {} }; },
+            model: function(name, schema) { return { name, schema }; },
+        }
+        userModule.__Rewire__('Mongoose', mongooseMock);
     });
 
     afterEach(() => {
         User = null;
-        mockery.disable();
-        mockery.deregisterAll();
+        userModule.__ResetDependency__('Mongoose');
     });
 
     it('registers a method called generateHash', () => {

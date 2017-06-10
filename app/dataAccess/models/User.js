@@ -1,5 +1,6 @@
-const Mongoose 	= require('mongoose');
-const bcrypt 	= require('bcrypt-nodejs');
+import Mongoose from 'mongoose';
+console.log(Mongoose);
+import bcrypt from 'bcrypt-nodejs';
 const Schema 	= Mongoose.Schema;
 
 Mongoose.Promise = global.Promise;
@@ -17,4 +18,4 @@ userSchema.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 };
 
-module.exports = Mongoose.model('User', userSchema);
+export default Mongoose.model('User', userSchema);
