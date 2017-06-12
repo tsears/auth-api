@@ -1,4 +1,7 @@
-function _ensureAdmin(User, log, username, password, adminUser) {
+import User from '../dataAccess/User';
+import log from '../log';
+
+export function _ensureAdmin(username, password, adminUser) {
   if (adminUser) {
     log('init', 'info', 'Admin user found.');
     return;
@@ -13,10 +16,10 @@ function _ensureAdmin(User, log, username, password, adminUser) {
   }
 }
 
-module.exports = function(User, options, log) {
-    
+export default function(options) {
+
     User.findByName(options.user)
-        .then(_ensureAdmin.bind(null, User, log, options.user, options.pass))
+        .then(_ensureAdmin.bind(null, options.user, options.pass))
         .catch((err) => {
             log('init', 'error', 'Error querying for admin', err);
         });

@@ -1,6 +1,6 @@
-import userModule from '../../app/dataAccess/models/User';
+import UserModel from '../../app/dataAccess/models/User';
 
-fdescribe('User model', () => {
+describe('User model', () => {
     let User;
 
     beforeEach(() => {
@@ -8,12 +8,13 @@ fdescribe('User model', () => {
             Schema: function(schema) { return { schema, methods: {} }; },
             model: function(name, schema) { return { name, schema }; },
         }
-        userModule.__Rewire__('Mongoose', mongooseMock);
+        UserModel.__Rewire__('Mongoose', mongooseMock);
+        User = UserModel();
     });
 
     afterEach(() => {
         User = null;
-        userModule.__ResetDependency__('Mongoose');
+        UserModel.__ResetDependency__('Mongoose');
     });
 
     it('registers a method called generateHash', () => {

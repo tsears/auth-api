@@ -1,6 +1,6 @@
 import log from '../../app/log';
 
-fdescribe('log', () => {
+describe('log', () => {
     it('logs when data is present', () => {
         const oldLog = console.log;
         let result;

@@ -1,60 +1,50 @@
-const adminInit = require('../../app/init/admin');
-const fakePromise = (arg) => {
-    // fake a promise chain without the async baggage...
-    return {
-        then: function(fn) {
-            fn(null, arg);
-
-            return {
-                catch: (fn) => { fn({message: 'foo'}) },
-            }
-        },
-
-    }
-}
+import Admin from '../../app/init/admin';
+import MockUser from '../support/MockUser';
 
 describe('admin init', () => {
-    it('does a thing', () => {
+    const MockLog = jasmine.createSpy('Log');
+
+    beforeEach(() => {
+        Admin.__Rewire__('User', MockUser);
+        Admin.__Rewire__('log', MockLog);
+    });
+
+    afterEach(() => {
+        Admin.__ResetDependency__('User');
+        Admin.__ResetDependency__('Log');
+    })
+
+    it('Initializes', () => {
         let findByNameArgs,
             createArgs;
-
-        const fake = (...args) => {
-            return fakePromise(args);
-        }
-
-        const logSpy = createSpy('log');
-
-        const findByNameFake = fake;
-        const createFake = fake;
-
-        UserSpy = createSpyObj('User', ['findByName', 'create']);
-        UserSpy.findByName.andCallFake(findByNameFake);
-        UserSpy.create.andCallFake(createFake);
 
         const options = {
             user: 'foo',
             pass: 'bar',
         };
 
-        adminInit(UserSpy, options, logSpy);
+        spyOn(MockUser, 'findByName').and.callThrough();
+        spyOn(MockUser, 'create').and.callThrough();
 
-        expect(UserSpy.findByName).toHaveBeenCalledWith('foo');
-        expect(UserSpy.create).toHaveBeenCalledWith('foo', 'bar');
-        expect(logSpy).toHaveBeenCalledWith(
+        Admin(options);
+
+        expect(MockUser.findByName).toHaveBeenCalledWith('foo');
+        expect(MockUser.create).toHaveBeenCalledWith('foo', 'bar');
+        expect(MockLog).toHaveBeenCalledWith(
             'init',
             'error',
             'Error creating admin account',
             jasmine.any(Object)
         );
 
-        expect(logSpy).toHaveBeenCalledWith(
+        expect(MockLog).toHaveBeenCalledWith(
             'init',
             'error',
             'Error querying for admin',
-            { message: 'foo' }
+            { message: 'Fake Error' }
         );
 
-        expect(logSpy).toHaveBeenCalledWith(
+        expect(MockLog).toHaveBeenCalledWith(
             'init',
             'info',
             'Created admin user: foo'
