@@ -2,17 +2,25 @@ const indexRoutes = require('../../app/routes');
 
 describe('routes/index', () => {
     it('registers auth routes', () => {
-        const authSpy = createSpyObj('auth', ['configure']);
-        const RouterSpy = createSpy('Router');
-        const routerSpy = createSpyObj('router', ['add']);
+        const authSpy = jasmine.createSpyObj('authRoutes', ['configure']);
+        const RouterSpy = jasmine.createSpy('Router');
+        const routerSpy = jasmine.createSpyObj('router', [
+            'use',
+        ]);
 
-        RouterSpy.andReturn(routerSpy);
+        RouterSpy.and.returnValue(routerSpy);
 
-        authSpy.configure.andReturn('foo');
+        authSpy.configure.and.returnValue('foo');
 
-        indexRoutes(RouterSpy, authSpy, 'bar', 'baz');
+        indexRoutes.__Rewire__('Router', RouterSpy);
+        indexRoutes.__Rewire__('authRoutes', authSpy);
 
-        expect(routerSpy.add).toHaveBeenCalledWith('/auth', 'foo');
-        expect(authSpy.configure).toHaveBeenCalledWith(RouterSpy, 'bar', 'baz');
+        indexRoutes('bar');
+
+        expect(routerSpy.use).toHaveBeenCalledWith('/auth', 'foo');
+        expect(authSpy.configure).toHaveBeenCalledWith('bar');
+
+        indexRoutes.__ResetDependency__('Router');
+        indexRoutes.__ResetDependency__('authRoutes');
     });
 });

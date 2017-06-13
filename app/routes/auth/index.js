@@ -1,10 +1,13 @@
-function loginSuccess(user, res, log, next, err) {
+import log from '../../log';
+import Router from 'express';
+
+function loginSuccess(user, res, next, err) {
     if (err) { return next(err); }
     log('auth', 'info', `User ${user.username} authenticated`);
     return res.json(200, { authenticated: true });
 }
 
-function passportLogin(req, res, next, log, err, user, info) {
+function passportLogin(req, res, next, err, user, info) {
     if (err || !user) {
         if (err) {
             log('auth', 'warn', 'error during authentication', err);
@@ -16,19 +19,19 @@ function passportLogin(req, res, next, log, err, user, info) {
         return next(err);
     }
 
-    req.logIn(user, loginSuccess.bind(null, user, res, log, next));
+    req.logIn(user, loginSuccess.bind(null, user, res, next));
 }
 
-function handleLogin(passport, log, req, res, next) {
+function handleLogin(passport, req, res, next) {
     passport.authenticate('local-login',
-        passportLogin.bind(null, req, res, next, log)
+        passportLogin.bind(null, req, res, next)
     )(req, res, next);
 }
 
-function configure(Router, passport, log) {
+function configure(passport) {
     log('router', 'info', 'initialized authentication routes');
     const router = new Router();
-    router.post('/login', handleLogin.bind(null, passport, log));
+    router.post('/login', handleLogin.bind(null, passport));
 
     return router;
 }

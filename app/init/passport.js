@@ -1,3 +1,7 @@
+import {Strategy as LocalStrategy} from 'passport-local';
+import UserAccess from '../dataAccess/user.js';
+
+
 function _serializeUser(user, done) {
     done(null, user._id);
 }
@@ -6,7 +10,7 @@ function _userFound(done, err, user) {
     done(err, user);
 }
 
-function _deserializeUser(UserAccess, userFound, id, done) {
+function _deserializeUser(userFound, id, done) {
     return UserAccess.findById(id)
         .then(userFound.bind(null, done))
         .catch((err) => { console.error('error', err.message); });
@@ -24,28 +28,26 @@ function _authenticate(req, username, password, done, user) {
     return done(null, user);
 }
 
-function _localStrategy(UserAccess) {
+function _localStrategy() {
     return function(req, username, password, done) {
         UserAccess.findByName(username)
             .then(_authenticate.bind(null, req, username, password, done))
             .catch((err) => {
-                console.log('err');
                 return done(err);
             });
     }
 }
 
-function configure(passport, UserAccess, LocalStrategy) {
+function configure(passport) {
     const strategyConfig = {
         usernameField : 'username',
         passwordField : 'password',
         passReqToCallback : true,
     }
 
-    const localStrategy = new LocalStrategy(strategyConfig, _localStrategy(UserAccess));
-
+    const localStrategy = new LocalStrategy(strategyConfig, _localStrategy());
     passport.serializeUser(_serializeUser);
-    passport.deserializeUser(_deserializeUser.bind(null, UserAccess, _userFound));
+    passport.deserializeUser(_deserializeUser.bind(null, _userFound));
     passport.use('local-login', localStrategy);
 
     return localStrategy;

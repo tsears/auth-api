@@ -1,231 +1,170 @@
-//const app = require('../app');
+import app from '../app';
 const noop = () => {};
 
-xdescribe('index.js', () => {
-    describe('app.run()', () => {
-        beforeEach(() => {
-            spyOn(app, 'init');
-            spyOn(app, 'configureServer');
-            spyOn(app, 'configureRoutes');
-            spyOn(app, 'configureDB');
-            spyOn(app, 'startServer');
+describe('index.js', () => {
+    let logSpy,
+        adminInitSpy,
+        settingsSpy,
+        passportInitSpy,
+        expressSpy,
+        expressRouterSpy,
+        expressUseSpy,
+        expressListenSpy,
+        bodyParserSpy,
+        flashSpy,
+        sessionSpy,
+        passportInitializeSpy,
+        passportSessionSpy,
+        passportSpy,
+        routerSpy,
+        routerUseSpy,
+        routesSpy,
+        mongooseSpy;
 
-            app.run(noop, noop, noop, {}, {}, {}, {}, {}, {}, {});
-        })
-
-        it('calls app.init()', () => {
-            expect(app.init).toHaveBeenCalled();
+    beforeAll(() => { // eslint-disable-line max-statements
+        logSpy = jasmine.createSpy();
+        adminInitSpy = jasmine.createSpy();
+        passportInitSpy = jasmine.createSpyObj('passportInit', ['configure']);
+        bodyParserSpy = jasmine.createSpy().and.returnValue('bodyParser object');
+        flashSpy = jasmine.createSpy().and.returnValue('flash object');
+        routerUseSpy = jasmine.createSpy();
+        expressUseSpy = jasmine.createSpy();
+        expressListenSpy = jasmine.createSpy();
+        expressRouterSpy = jasmine.createSpy().and.returnValue({
+            use: routerUseSpy,
         });
-
-        it('calls app.configureServer()', () => {
-            expect(app.configureServer).toHaveBeenCalled();
+        expressSpy = jasmine.createSpy().and.returnValue({
+            use: expressUseSpy,
+            listen: expressListenSpy,
         });
+        expressSpy.Router = expressRouterSpy;
+        routesSpy = jasmine.createSpy().and.returnValue('routes object');
+        sessionSpy = jasmine.createSpy().and.returnValue('session object');
+        passportInitializeSpy = jasmine.createSpy();
+        passportSessionSpy = jasmine.createSpy();
+        passportSpy = jasmine.createSpy();
+        mongooseSpy = jasmine.createSpyObj('mongoose', ['connect']);
 
-        it('calls app.configureRoutes()', () => {
-            expect(app.configureRoutes).toHaveBeenCalled();
-        });
+        passportSpy.initialize = passportInitializeSpy.and.returnValue('passport init object');
+        passportSpy.session = passportSessionSpy.and.returnValue('passport session object');
 
-        it('calls app.configureDB()', () => {
-            expect(app.configureDB).toHaveBeenCalled();
-        });
+        const fakeSettings = {
+            adminUser: 'foo',
+            adminPass: 'bar',
+            sessionSecret: 'baz',
+            mongoIP: 'qux',
+            mongoPort: 'quxx',
+            mongoDatabase: 'apple',
+            port: 123,
+        };
 
-        it('calls app.startServer()', () => {
-            expect(app.startServer).toHaveBeenCalled();
+        settingsSpy = jasmine.createSpy().and.returnValue(fakeSettings);
+
+        app.__Rewire__('log', logSpy);
+        app.__Rewire__('adminInit', adminInitSpy);
+        app.__Rewire__('Settings', settingsSpy);
+        app.__Rewire__('passportInit', passportInitSpy);
+        app.__Rewire__('passport', passportSpy);
+        app.__Rewire__('bodyParser', bodyParserSpy);
+        app.__Rewire__('flash', flashSpy);
+        app.__Rewire__('express', expressSpy);
+        app.__Rewire__('session', sessionSpy);
+        app.__Rewire__('routes', routesSpy);
+        app.__Rewire__('mongoose', mongooseSpy);
+        app();
+    });
+
+    afterAll(() => {
+        app.__ResetDependency__('log');
+        app.__ResetDependency__('adminInit');
+        app.__ResetDependency__('Settings');
+        app.__ResetDependency__('passportInit');
+        app.__ResetDependency__('passport');
+        app.__ResetDependency__('bodyParser');
+        app.__ResetDependency__('flash');
+        app.__ResetDependency__('express');
+        app.__ResetDependency__('session');
+        app.__ResetDependency__('routes');
+        app.__ResetDependency__('mongoose');
+    });
+
+    it('Initializes Settings', () => {
+        expect(settingsSpy).toHaveBeenCalledWith(jasmine.anything());
+    });
+
+    it('initializes logging', () => {
+        expect(logSpy).toHaveBeenCalledWith('log', 'info', 'initialized logging');
+    })
+
+    it('calls adminInit with user, settings, and log', () => {
+        expect(adminInitSpy).toHaveBeenCalledWith({
+            user: 'foo',
+            pass: 'bar',
         });
     });
 
-    describe('app.init()', () => {
-        it('logs a message', () => {
-            const logSpy = createSpy('log');
-            const passportInitSpy = createSpyObj('passportInit', ['configure']);
-            const UserAccessSpy = createSpy('UserAccess');
+    it('calls passportInit with passport', () => {
+        expect(passportInitSpy.configure).toHaveBeenCalledWith(passportSpy);
+    });
 
-            app.init(logSpy, noop, passportInitSpy, {}, {}, UserAccessSpy, {}, {});
+    it('creates the express server', () => {
+        expect(expressSpy).toHaveBeenCalled();
+    });
 
-            expect(logSpy).toHaveBeenCalled();
-        });
+    it('registers the bodyParser middleware', () => {
+        expect(bodyParserSpy).toHaveBeenCalled();
+        expect(expressUseSpy).toHaveBeenCalledWith('bodyParser object');
+    });
 
-        it('calls adminInit with user, settings, and log', () => {
-            const adminInitSpy = createSpy('adminInit');
-            const passportInitSpy = createSpyObj('passportInit', ['configure']);
-            const fakeSettings = {
-                adminUser: 'foo',
-                adminPass: 'bar',
-            };
-            const UserAccessSpy = createSpy('UserAccess');
+    it('registers the flash middleware', () => {
+        expect(flashSpy).toHaveBeenCalled();
+        expect(expressUseSpy).toHaveBeenCalledWith('flash object');
+    });
 
-            const adminUserPass = {
-                user: fakeSettings.adminUser,
-                pass: fakeSettings.adminPass,
-            }
-
-            app.init(noop, adminInitSpy, passportInitSpy, fakeSettings, {}, UserAccessSpy, {}, {});
-            expect(adminInitSpy).toHaveBeenCalledWith({}, adminUserPass, jasmine.any(Function));
-        });
-
-        it('calls passportInit with passport and user', () => {
-            const passportInitSpy = createSpyObj('passportInit', ['configure']);
-            const UserAccessSpy = createSpy('UserAccess');
-
-            app.init(noop, noop, passportInitSpy, {}, {}, UserAccessSpy, {}, {});
-
-            expect(passportInitSpy.configure).toHaveBeenCalled();
+    it('registers sessions middleware', () => {
+        expect(expressUseSpy).toHaveBeenCalledWith('session object');
+        expect(sessionSpy).toHaveBeenCalledWith({
+            cookieName: 'session',
+            secret: 'baz',
+            duration: 90 * 24 * 60 * 60 * 1000,
         });
     });
 
-    describe('app.configureServer()', () => {
-        let restifySpy,
-            sessionsSpy,
-            fakeSettings,
-            useCalls,
-            server;
-
-        beforeEach(() => {
-            restifySpy = createSpyObj('restify', [
-                'createServer',
-                'queryParser',
-                'bodyParser',
-            ]);
-
-
-            const serverSpy = createSpyObj('server', ['use']);
-            restifySpy.createServer.andReturn(serverSpy);
-            restifySpy.queryParser.andReturn('queryParser');
-            restifySpy.bodyParser.andReturn('bodyParser');
-
-            const flashSpy = createSpy('flash');
-            flashSpy.andReturn('flash');
-
-            sessionsSpy = createSpy('sessions');
-            sessionsSpy.andReturn('sessions');
-
-            const passportSpy = createSpyObj('passport', [
-                'initialize',
-                'session',
-            ]);
-            passportSpy.initialize.andReturn('passport-initialize');
-            passportSpy.session.andReturn('passport-session');
-
-            fakeSettings = {
-                appName: 'foo',
-                sessionSecret: 'bar',
-            }
-
-            server = app.configureServer(restifySpy, sessionsSpy, fakeSettings, flashSpy, passportSpy);
-        });
-
-        it('creates the restify server', () => {
-            expect(restifySpy.createServer).toHaveBeenCalledWith({ name: fakeSettings.appName });
-        });
-
-        it('registers queryparser middleware', () => {
-            expect(server.use.argsForCall[0][0]).toBe('queryParser');
-        });
-
-        it('registers the bodyParser middleware', () => {
-            expect(server.use.argsForCall[1][0]).toBe('bodyParser');
-        });
-
-        it('registers the flash middleware', () => {
-            expect(server.use.argsForCall[2][0]).toBe('flash');
-        });
-
-        it('registers sessions middleware', () => {
-            expect(server.use.argsForCall[3][0]).toBe('sessions');
-            expect(sessionsSpy).toHaveBeenCalledWith({
-                cookieName: 'session',
-                secret: fakeSettings.sessionSecret,
-                duration: 90 * 24 * 60 * 60 * 1000,
-            });
-        });
-
-        it('registers passport middleware', () => {
-            expect(server.use.argsForCall[4][0]).toBe('passport-initialize');
-        });
-
-        it('registers passport session middleware', () => {
-            expect(server.use.argsForCall[5][0]).toBe('passport-session');
-        });
+    it('registers passport middleware', () => {
+        expect(expressUseSpy).toHaveBeenCalledWith('passport init object');
+        expect(passportInitializeSpy).toHaveBeenCalled();
     });
 
-    describe('app.configureRoutes()', () => {
-        let routerSpy;
-
-        beforeEach(() => {
-            const RouterSpy = createSpy('Router');
-            routerSpy = createSpyObj('router', [
-                'add',
-                'applyRoutes',
-            ])
-
-            RouterSpy.andReturn(routerSpy);
-
-            const routesSpy = createSpy('routes');
-            routesSpy.andReturn('foo');
-
-            app.configureRoutes(RouterSpy, routesSpy, {}, 'server', 'passport', 'log');
-        });
-
-        it('adds base routes', () => {
-            expect(routerSpy.add).toHaveBeenCalledWith('/', 'foo');
-        });
-
-        it('applies the routes', () => {
-            expect(routerSpy.applyRoutes).toHaveBeenCalledWith('server', '/');
-        })
+    it('registers passport session middleware', () => {
+        expect(expressUseSpy).toHaveBeenCalledWith('passport session object');
+        expect(passportSessionSpy).toHaveBeenCalled();
     });
 
-    describe('app.configureDB', () => {
-        let mongooseSpy,
-            logSpy;
-
-        beforeEach(() => {
-            const fakeSettings = {
-                mongoIP: 'a.b.c.d',
-                mongoPort: 123,
-                mongoDatabase: 'foo',
-            };
-
-            const promise = 'promise';
-
-            mongooseSpy = createSpyObj('mongoose', [
-                'connect',
-            ]);
-
-            logSpy = createSpy('log');
-
-            app.configureDB(mongooseSpy, fakeSettings, promise, logSpy);
-        });
-
-        it('calls connect with the correct url', () => {
-            expect(mongooseSpy.connect).toHaveBeenCalledWith('mongodb://a.b.c.d:123/foo');
-        });
-
-        it('configures mongoose to use es6 promises', () => {
-            expect(mongooseSpy.Promise).toBe('promise');
-        })
-
-        it('logs status', () => {
-            expect(logSpy).toHaveBeenCalledWith('db', 'info', 'Connected to db @ mongodb://a.b.c.d:123/foo');
-        });
+    it('logs route initialization', () => {
+        expect(logSpy).toHaveBeenCalledWith('routes', 'info', 'initializing routes');
     });
 
-    describe('app.startServer()', () => {
-        let serverSpy,
-            logSpy;
+    it('adds base routes', () => {
+        expect(routerUseSpy).toHaveBeenCalledWith('routes object');
+    });
 
-        beforeEach(() => {
-            serverSpy = createSpyObj('server', [
-                'listen',
-            ]);
+    it('applies the routes', () => {
+        expect(expressUseSpy).toHaveBeenCalledWith('/', jasmine.any(Object));
+    });
 
-            const fakeSettings = { port: 123 };
+    it('tells mongoose to use es6 promises', () => {
+        expect(mongooseSpy.Promise).toEqual(global.Promise);
+    });
 
-            app.startServer(serverSpy, fakeSettings, noop);
-        });
+    it('calls connect with the correct url', () => {
+        expect(mongooseSpy.connect).toHaveBeenCalledWith('mongodb://qux:quxx/apple');
+    });
 
-        it('calls server.listen with correct port', () => {
-            expect(serverSpy.listen).toHaveBeenCalledWith(123, jasmine.any(Function))
-        })
+    it('logs mongo connection status', () => {
+        expect(logSpy).toHaveBeenCalledWith('db', 'info', 'Connected to db @ mongodb://qux:quxx/apple');
+    });
+
+    it('calls server.listen with correct port', () => {
+        expect(expressListenSpy).toHaveBeenCalledWith(123, jasmine.any(Function))
     });
 });

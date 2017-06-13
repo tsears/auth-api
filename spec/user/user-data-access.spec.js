@@ -2,40 +2,44 @@ const userDataAccess = require('../../app/dataAccess/user');
 
 describe('dataAccess/user', () => {
     let UserSpy,
-        user;
+        generateHashSpy,
+        saveSpy;
 
     beforeEach(() => {
-        UserSpy = createSpyObj('User', ['findById', 'findOne'])
-        UserSpy.findById.andReturn( { exec: () => {} });
-        UserSpy.findOne.andReturn( { exec: () => {} });
-        user = userDataAccess(UserSpy);
+        const fakeExec = { exec: () => {}};
+        UserSpy = jasmine.createSpy();
+        UserSpy.findById = jasmine.createSpy().and.returnValue(fakeExec);
+        UserSpy.findOne = jasmine.createSpy().and.returnValue(fakeExec);
+        saveSpy = jasmine.createSpy().and.returnValue(fakeExec);
+
+        generateHashSpy = jasmine.createSpy();
+        UserSpy.and.returnValue({
+            generateHash: generateHashSpy,
+            save: saveSpy,
+        });
+
+        userDataAccess.__Rewire__('UserModel', UserSpy);
     });
 
     afterEach(() => {
         UserSpy = null;
-        user = null;
+        userDataAccess.__ResetDependency__('UserModel');
     })
 
-    it('findUserById queries for user by id', () => {
-        user.findById('123');
+    it('findById queries for user by id', () => {
+        userDataAccess.findById('123');
         expect(UserSpy.findById).toHaveBeenCalledWith('123');
     });
 
-    it('findUserByName queries for user by username', () => {
-        user.findByName('foo');
+    it('findByName queries for user by username', () => {
+        userDataAccess.findByName('foo');
         expect(UserSpy.findOne).toHaveBeenCalledWith({ username: 'foo'});
     })
 
     it('create creates a new user', () => {
-        UserSpy = createSpy().andReturn({
-            generateHash: (p) => p,
-            save: () => { return { exec: () => { return this; } } },
-        });
-
-        user = userDataAccess(UserSpy);
-
-        user.create('foo', 'bar');
+        userDataAccess.create('foo', 'bar');
         expect(UserSpy).toHaveBeenCalled();
-
+        expect(generateHashSpy).toHaveBeenCalledWith('bar');
+        expect(saveSpy).toHaveBeenCalled();
     });
 });
