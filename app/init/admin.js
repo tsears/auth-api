@@ -1,4 +1,4 @@
-import User from '../dataAccess/User';
+import User from '../dataAccess/user';
 import log from '../log';
 
 export function _ensureAdmin(username, password, adminUser) {
