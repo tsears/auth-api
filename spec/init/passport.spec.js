@@ -1,4 +1,4 @@
-import fakePromise from '../support/fakePromise';
+import fakePromise from '../support/FakePromise';
 import MockUser from '../support/MockUser';
 import passportInit from '../../app/init/passport';
 
