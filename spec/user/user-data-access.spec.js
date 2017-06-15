@@ -1,45 +1,69 @@
-const userDataAccess = require('../../app/dataAccess/user');
+import userDataAccess from '../../app/dataAccess/user';
 
-describe('dataAccess/user', () => {
-    let UserSpy,
-        generateHashSpy,
-        saveSpy;
+describe('dataAccess/user queries', () => {
+    let UserSpy;
+    let findByIdSpy;
+    let findOneSpy;
 
-    beforeEach(() => {
+    beforeAll(() => {
         const fakeExec = { exec: () => {}};
         UserSpy = jasmine.createSpy();
-        UserSpy.findById = jasmine.createSpy().and.returnValue(fakeExec);
-        UserSpy.findOne = jasmine.createSpy().and.returnValue(fakeExec);
-        saveSpy = jasmine.createSpy().and.returnValue(fakeExec);
+        findByIdSpy = jasmine.createSpy().and.returnValue(fakeExec);
+        findOneSpy  = jasmine.createSpy().and.returnValue(fakeExec);
 
-        generateHashSpy = jasmine.createSpy();
         UserSpy.and.returnValue({
-            generateHash: generateHashSpy,
-            save: saveSpy,
-        });
+            findById: findByIdSpy,
+            findOne: findOneSpy,
+        })
 
         userDataAccess.__Rewire__('UserModel', UserSpy);
     });
 
-    afterEach(() => {
-        UserSpy = null;
+    afterAll(() => {
         userDataAccess.__ResetDependency__('UserModel');
     })
 
     it('findById queries for user by id', () => {
         userDataAccess.findById('123');
-        expect(UserSpy.findById).toHaveBeenCalledWith('123');
+        expect(findByIdSpy).toHaveBeenCalledWith('123');
     });
 
     it('findByName queries for user by username', () => {
         userDataAccess.findByName('foo');
-        expect(UserSpy.findOne).toHaveBeenCalledWith({ username: 'foo'});
+        expect(findOneSpy).toHaveBeenCalledWith({ username: 'foo'});
     })
 
-    it('create creates a new user', () => {
+
+});
+
+xdescribe('dataAccess/user save', () => {
+    let UserSpy;
+    let generateHashSpy;
+    let saveSpy;
+
+    beforeAll(() => {
+        UserSpy = jasmine.createSpy();
+        saveSpy = jasmine.createSpy();
+        generateHashSpy = jasmine.createSpy();
+
+        UserSpy.and.returnValue(() => {
+            return {
+                generateHash: generateHashSpy,
+                save: saveSpy,
+            }
+        });
+
+        userDataAccess.__Rewire__('UserModel', UserSpy);
+    });
+
+    afterAll(() => {
+        userDataAccess.__ResetDependency__('UserModel');
+    });
+
+    it('ccreates a new user', () => {
         userDataAccess.create('foo', 'bar');
         expect(UserSpy).toHaveBeenCalled();
         expect(generateHashSpy).toHaveBeenCalledWith('bar');
         expect(saveSpy).toHaveBeenCalled();
     });
-});
+})

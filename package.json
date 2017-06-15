@@ -4,7 +4,7 @@
   "description": "Basic authenticated API using Docker, Node, Restify, Passport, and Mongo",
   "main": "dist/bundle.js",
   "scripts": {
-    "build": "node_modules/.bin/webpack",
+    "build": "node_modules/.bin/webpack && docker build -t tsears/auth-api .",
     "build:watch": "node_modules/.bin/webpack --watch",
     "start": "node dist/bundle.js",
     "test": "istanbul cover --include-all-sources node_modules/.bin/babel-node test/run.js",
@@ -25,6 +25,8 @@
     "coveralls": "^2.13.1",
     "jasmine": "^2.6.0",
     "json-loader": "^0.5.4",
+    "source-map-loader": "^0.2.1",
+    "source-map-support": "^0.4.15",
     "webpack": "^2.6.1"
   },
   "dependencies": {

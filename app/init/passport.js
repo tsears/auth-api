@@ -18,11 +18,11 @@ function _deserializeUser(userFound, id, done) {
 
 function _authenticate(req, username, password, done, user) {
     if (!user) {
-      return done(null, false, req.flash('loginMessage', 'Login Failed.'));
+        return done(null, false, req.flash('loginMessage', 'Login Failed.'));
     }
 
     if (!user.validPassword(password)) {
-      return done(null, false, req.flash('loginMessage', 'Login Failed.'));
+        return done(null, false, req.flash('loginMessage', 'Login Failed.'));
     }
 
     return done(null, user);

@@ -4,7 +4,7 @@ import Router from 'express';
 function loginSuccess(user, res, next, err) {
     if (err) { return next(err); }
     log('auth', 'info', `User ${user.username} authenticated`);
-    return res.json(200, { authenticated: true });
+    return res.status(200).json({ authenticated: true });
 }
 
 function passportLogin(req, res, next, err, user, info) {
@@ -15,7 +15,7 @@ function passportLogin(req, res, next, err, user, info) {
             log('auth', 'info', `Authentication failed for user ${req.params.username}`);
         }
 
-        res.json(401, { authenticated: false });
+        res.status(401).json({ authenticated: false });
         return next(err);
     }
 

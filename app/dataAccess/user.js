@@ -1,17 +1,34 @@
-import UserModel from './models/User';
+import UserModel from './models/User'
+
+let _userModel;
+
+function getUserModel() {
+    if (!_userModel) {
+        _userModel = UserModel();
+    }
+
+    return _userModel;
+}
 
 export const findById = (id) => {
-    return UserModel.findById(id).exec();
+    return getUserModel().findById(id).exec();
 }
 
 export const findByName = (username) => {
-    return UserModel.findOne({ 'username' :  username }).exec();
+    return getUserModel().findOne({ 'username' :  username }).exec();
 }
 
 export const create = (user, pass) => {
-    const newUser = new UserModel();
+    const userModel = getUserModel();
+    const newUser = new userModel();
     newUser.username = user;
     newUser.password = newUser.generateHash(pass);
 
-    return newUser.save().exec();
+    return newUser.save();
+}
+
+export default {
+    findById,
+    findByName,
+    create,
 }

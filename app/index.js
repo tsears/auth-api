@@ -9,6 +9,7 @@ import passportInit    from './init/passport';
 import adminInit       from './init/admin';
 import session         from 'express-session';
 import routes          from './routes';
+import { install }     from 'source-map-support';
 
 export default function run() {
     const settings = Settings(process.env);
@@ -53,6 +54,7 @@ export default function run() {
     });
 }
 
-if(module.id === '.') {
+if(module.webpackPolyfill) {
+    install();
     run();
 }
