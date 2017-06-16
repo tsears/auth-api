@@ -1,5 +1,5 @@
-module.exports = function(env) {
-  let s;
+module.exports = function (env) {
+  let s
   if (!s) {
     s = {
       port: env.APP_PORT,
@@ -13,5 +13,5 @@ module.exports = function(env) {
     }
   }
 
-  return s;
+  return s
 }

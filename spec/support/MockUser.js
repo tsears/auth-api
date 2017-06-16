@@ -1,9 +1,9 @@
-import FakePromise from './FakePromise';
+import FakePromise from './FakePromise'
 
 const User = {
-    findByName: FakePromise,
-    findById: FakePromise,
-    create: FakePromise,
+  findByName: FakePromise,
+  findById: FakePromise,
+  create: FakePromise,
 }
 
-export default User;
+export default User
