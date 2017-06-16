@@ -33,35 +33,3 @@ describe('dataAccess/user queries', () => {
     expect(findOneSpy).toHaveBeenCalledWith({ username: 'foo' })
   })
 })
-
-xdescribe('dataAccess/user save', () => {
-  let UserSpy
-  let generateHashSpy
-  let saveSpy
-
-  beforeAll(() => {
-    UserSpy = jasmine.createSpy()
-    saveSpy = jasmine.createSpy()
-    generateHashSpy = jasmine.createSpy()
-
-    UserSpy.and.returnValue(() => {
-      return {
-        generateHash: generateHashSpy,
-        save: saveSpy,
-      }
-    })
-
-    userDataAccess.__Rewire__('UserModel', UserSpy)
-  })
-
-  afterAll(() => {
-    userDataAccess.__ResetDependency__('UserModel')
-  })
-
-  it('ccreates a new user', () => {
-    userDataAccess.create('foo', 'bar')
-    expect(UserSpy).toHaveBeenCalled()
-    expect(generateHashSpy).toHaveBeenCalledWith('bar')
-    expect(saveSpy).toHaveBeenCalled()
-  })
-})

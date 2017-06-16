@@ -1,4 +1,4 @@
-module.exports = function (env) {
+export default function (env) {
   let s
   if (!s) {
     s = {

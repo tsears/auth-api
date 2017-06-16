@@ -9,11 +9,11 @@
     "start": "node dist/bundle.js",
     "test": "node_modules/.bin/babel-node node_modules/.bin/babel-istanbul cover node_modules/.bin/jasmine",
     "test:min": "babel-node node_modules/.bin/jasmine || true",
-    "test:cont": "jasmine-node test/ --autotest --watch test/ app/ || true",
+    "test:cont": "node_modules/.bin/babel-node node_modules/.bin/babel-istanbul cover node_modules/.bin/jasmine || true",
     "dev": "node_modules/nodemon/bin/nodemon.js --watch dist",
     "container:dev": "docker-compose -f docker-compose/dev.yml up",
     "lint": "node_modules/.bin/eslint ./",
-    "cover": "node_modules/.bin/babel-node node_modules/.bin/babel-istanbul cover node_modules/.bin/jasmine app/ && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "cover": "node_modules/.bin/babel-node node_modules/.bin/babel-istanbul cover node_modules/.bin/jasmine && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "author": "Tom Sears",
   "license": "MIT",
